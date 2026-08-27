@@ -1,0 +1,212 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ============================================
+    // HELPER FUNCTIONS
+    // ============================================
+
+    // Check if user is authenticated
+    function isAuth() {
+      return request.auth != null;
+    }
+
+    // Get user's role from custom claims
+    function getRole() {
+      return request.auth.token.role;
+    }
+
+    // Check if user is Super Admin
+    function isSuperAdmin() {
+      return isAuth() && getRole() == 'superadmin';
+    }
+
+    // Check if user is an Owner
+    function isOwner() {
+      return isAuth() && getRole() == 'owner';
+    }
+
+    // Check if user is a Station account
+    function isStation() {
+      return isAuth() && getRole() == 'station';
+    }
+
+    // Check if user's branchId matches the document's branch
+    function isBranchMember(branchId) {
+      return isAuth() && request.auth.token.branchId == branchId;
+    }
+
+    // Check if user owns the branch (via ownerId)
+    function isBranchOwner(branchId) {
+      return isOwner() && 
+        exists(/databases/$(database)/documents/branches/$(branchId)) &&
+        get(/databases/$(database)/documents/branches/$(branchId)).data.ownerId == request.auth.token.ownerId;
+    }
+
+    // Check if branch is active (not suspended)
+    function isBranchActive(branchId) {
+      return !exists(/databases/$(database)/documents/system/licenses/$(branchId)) ||
+        get(/databases/$(database)/documents/system/licenses/$(branchId)).data.status == 'active';
+    }
+
+    // Check if a feature is enabled for a branch
+    function isFeatureEnabled(branchId, feature) {
+      return !exists(/databases/$(database)/documents/system/licenses/$(branchId)) ||
+        get(/databases/$(database)/documents/system/licenses/$(branchId)).data.enabledFeatures[feature] == true;
+    }
+
+    // ============================================
+    // OWNERS COLLECTION
+    // ============================================
+    match /owners/{ownerId} {
+      // Owner can read their own data
+      allow read: if isSuperAdmin() || 
+        (isOwner() && request.auth.token.ownerId == ownerId);
+      
+      // Only Super Admin can create/update owners
+      allow write: if isSuperAdmin();
+    }
+
+    // ============================================
+    // BRANCHES COLLECTION
+    // ============================================
+    match /branches/{branchId} {
+      // Read: Super Admin, Branch Owner, or Branch Member (station)
+      allow read: if isSuperAdmin() || 
+        isBranchOwner(branchId) || 
+        isBranchMember(branchId);
+      
+      // Write: Super Admin or Branch Owner only
+      allow create: if isSuperAdmin();
+      allow update: if isSuperAdmin() || isBranchOwner(branchId);
+      allow delete: if isSuperAdmin();
+
+      // --- STAFF subcollection ---
+      match /staff/{staffId} {
+        allow read: if isSuperAdmin() || 
+          isBranchOwner(branchId) || 
+          isBranchMember(branchId);
+        
+        // Only Super Admin, Owner, or Branch Admin can manage staff
+        allow write: if isSuperAdmin() || 
+          isBranchOwner(branchId);
+      }
+
+      // --- STATIONS subcollection ---
+      match /stations/{stationId} {
+        allow read: if isSuperAdmin() || 
+          isBranchOwner(branchId) || 
+          isBranchMember(branchId);
+        
+        allow write: if isSuperAdmin() || 
+          isBranchOwner(branchId);
+      }
+
+      // --- ORDERS subcollection ---
+      match /orders/{orderId} {
+        // Read: branch members, owner, super admin
+        allow read: if isSuperAdmin() || 
+          isBranchOwner(branchId) || 
+          isBranchMember(branchId);
+        
+        // Write: only active branches, by station members
+        allow create: if isBranchActive(branchId) && 
+          (isSuperAdmin() || isBranchOwner(branchId) || isBranchMember(branchId));
+        
+        allow update: if isBranchActive(branchId) && 
+          (isSuperAdmin() || isBranchOwner(branchId) || isBranchMember(branchId));
+        
+        allow delete: if isSuperAdmin();
+      }
+
+      // --- MENU subcollection ---
+      match /menu/{itemId} {
+        // Menu is readable by branch members + public QR (handled separately)
+        allow read: if isSuperAdmin() || 
+          isBranchOwner(branchId) || 
+          isBranchMember(branchId);
+        
+        allow write: if isBranchActive(branchId) && 
+          (isSuperAdmin() || isBranchOwner(branchId));
+      }
+
+      // --- INVENTORY subcollection ---
+      match /inventory/{itemId} {
+        allow read: if isSuperAdmin() || 
+          isBranchOwner(branchId) || 
+          isBranchMember(branchId);
+        
+        allow write: if isBranchActive(branchId) && 
+          (isSuperAdmin() || isBranchOwner(branchId) || isBranchMember(branchId));
+      }
+
+      // --- CUSTOMERS subcollection ---
+      match /customers/{customerId} {
+        allow read: if isSuperAdmin() || 
+          isBranchOwner(branchId) || 
+          isBranchMember(branchId);
+        
+        allow write: if isBranchActive(branchId) && 
+          (isSuperAdmin() || isBranchOwner(branchId) || isBranchMember(branchId));
+      }
+
+      // --- AUDIT LOGS subcollection ---
+      match /auditLogs/{logId} {
+        // Read: Super Admin, Owner, or Branch Admin
+        allow read: if isSuperAdmin() || 
+          isBranchOwner(branchId);
+        
+        // Write: only via Cloud Functions (server-side) or Super Admin
+        allow create: if isSuperAdmin() || 
+          isBranchOwner(branchId) || 
+          isBranchMember(branchId);
+        
+        // Audit logs are immutable — no update or delete
+        allow update, delete: if false;
+      }
+    }
+
+    // ============================================
+    // SYSTEM COLLECTION (Super Admin only)
+    // ============================================
+    match /system/{document=**} {
+      allow read: if isSuperAdmin() || 
+        // Stations can read their own branch license to check status
+        (isStation() && resource != null);
+      allow write: if isSuperAdmin();
+    }
+
+    // Specific license read for branch status check
+    match /system/licenses/{branchId} {
+      allow read: if isSuperAdmin() || 
+        isBranchMember(branchId) || 
+        isBranchOwner(branchId);
+      allow write: if isSuperAdmin();
+    }
+
+    // System audit logs
+    match /system/auditLogs/{logId} {
+      allow read: if isSuperAdmin();
+      allow create: if isSuperAdmin();
+      allow update, delete: if false;
+    }
+
+    // ============================================
+    // PUBLIC MENU (for QR code access)
+    // ============================================
+    match /publicMenu/{branchId} {
+      // Anyone can read public menu (for QR ordering)
+      allow read: if true;
+      // Only system can write (synced from branches/menu via Cloud Function)
+      allow write: if isSuperAdmin();
+    }
+
+    // ============================================
+    // DEFAULT: Allow logged in users for manual testing
+    // ============================================
+    match /{document=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}

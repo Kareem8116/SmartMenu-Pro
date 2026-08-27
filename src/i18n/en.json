@@ -1,0 +1,66 @@
+{
+  "app": {
+    "name": "SmartMenu Pro",
+    "tagline": "Smart Restaurant Management System"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "retry": "Retry",
+    "back": "Back",
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "confirm": "Confirm",
+    "search": "Search",
+    "logout": "Logout",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "auth": {
+    "login": "Login",
+    "email": "Email",
+    "password": "Password",
+    "enterEmail": "Enter your email",
+    "enterPassword": "Enter your password",
+    "stationLogin": "Station Login",
+    "stationLoginDesc": "Sign in to your POS or KDS station",
+    "ownerLogin": "Owner Login",
+    "ownerLoginDesc": "Sign in to manage your branches",
+    "superAdminLogin": "System Admin",
+    "superAdminLoginDesc": "SmartMenu Pro Control Panel",
+    "pinTitle": "Enter Your PIN",
+    "pinDesc": "Enter your 4-digit staff PIN to continue",
+    "pinError": "Invalid PIN. Please try again.",
+    "loginError": "Invalid email or password",
+    "signingIn": "Signing in...",
+    "verifying": "Verifying...",
+    "switchToOwner": "Owner Login",
+    "switchToStation": "Station Login",
+    "branchSuspended": "This branch is currently suspended. Please contact your administrator.",
+    "branchExpired": "Your subscription has expired. Please renew to continue.",
+    "accountDisabled": "Your account has been disabled. Please contact support."
+  },
+  "roles": {
+    "superadmin": "Super Admin",
+    "owner": "Owner",
+    "admin": "Branch Manager",
+    "cashier": "Cashier",
+    "waiter": "Waiter",
+    "chef": "Chef"
+  },
+  "dashboard": {
+    "welcome": "Welcome",
+    "selectBranch": "Select Branch",
+    "allBranches": "All Branches",
+    "noBranches": "No branches found"
+  },
+  "unauthorized": {
+    "title": "Access Denied",
+    "message": "You don't have permission to access this page.",
+    "goBack": "Go Back"
+  }
+}

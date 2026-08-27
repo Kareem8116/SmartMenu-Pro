@@ -1,0 +1,66 @@
+{
+  "app": {
+    "name": "سمارت منيو برو",
+    "tagline": "نظام إدارة المطاعم الذكي"
+  },
+  "common": {
+    "loading": "جاري التحميل...",
+    "error": "حدث خطأ",
+    "retry": "إعادة المحاولة",
+    "back": "رجوع",
+    "submit": "إرسال",
+    "cancel": "إلغاء",
+    "save": "حفظ",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "close": "إغلاق",
+    "confirm": "تأكيد",
+    "search": "بحث",
+    "logout": "تسجيل خروج",
+    "yes": "نعم",
+    "no": "لا"
+  },
+  "auth": {
+    "login": "تسجيل الدخول",
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "enterEmail": "أدخل بريدك الإلكتروني",
+    "enterPassword": "أدخل كلمة المرور",
+    "stationLogin": "دخول المحطة",
+    "stationLoginDesc": "سجّل دخول محطة الكاشير أو المطبخ",
+    "ownerLogin": "دخول صاحب المكان",
+    "ownerLoginDesc": "سجّل دخولك لإدارة فروعك",
+    "superAdminLogin": "مدير النظام",
+    "superAdminLoginDesc": "لوحة تحكم سمارت منيو برو",
+    "pinTitle": "أدخل رقم PIN",
+    "pinDesc": "أدخل رقم PIN المكوّن من 4 أرقام",
+    "pinError": "رقم PIN غير صحيح. حاول مرة تانية.",
+    "loginError": "البريد الإلكتروني أو كلمة المرور غير صحيحة",
+    "signingIn": "جاري تسجيل الدخول...",
+    "verifying": "جاري التحقق...",
+    "switchToOwner": "دخول صاحب المكان",
+    "switchToStation": "دخول المحطة",
+    "branchSuspended": "هذا الفرع موقوف حاليًا. تواصل مع الإدارة.",
+    "branchExpired": "انتهى اشتراكك. جدّد الاشتراك للمتابعة.",
+    "accountDisabled": "حسابك معطّل. تواصل مع الدعم."
+  },
+  "roles": {
+    "superadmin": "مدير النظام",
+    "owner": "صاحب المكان",
+    "admin": "مدير الفرع",
+    "cashier": "كاشير",
+    "waiter": "ويتر",
+    "chef": "شيف"
+  },
+  "dashboard": {
+    "welcome": "مرحبًا",
+    "selectBranch": "اختر الفرع",
+    "allBranches": "كل الفروع",
+    "noBranches": "لا توجد فروع"
+  },
+  "unauthorized": {
+    "title": "غير مصرّح",
+    "message": "ليس لديك صلاحية للوصول لهذه الصفحة.",
+    "goBack": "رجوع"
+  }
+}
